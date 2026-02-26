@@ -1,0 +1,13 @@
+org: icmtuff
+project: MLTest
+
+approvers:
+  minimum:
+    qa: 1
+    stg: 2
+    prd: 3
+  list:
+    - name: "Łukasz Bryzek"
+      id: "309aa073-f8ae-6044-adfa-7fc809f27f2d"
+    - name: "John Smith"
+      id: "LoremIpsumDolor"

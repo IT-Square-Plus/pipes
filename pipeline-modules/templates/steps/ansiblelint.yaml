@@ -1,0 +1,8 @@
+---
+steps:
+  - script: |
+      export LC_ALL=C.UTF-8
+      export LANG=C.UTF-8
+      ansible-lint -c $(Build.SourcesDirectory)/14494_CMMN_EMEA-GI-Team-Common-Library/pipeline-modules/dotfiles/.ansible-lint .
+    displayName: "⚙️ Ansible Linter"
+...

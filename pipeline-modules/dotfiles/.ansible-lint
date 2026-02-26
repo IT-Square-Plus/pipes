@@ -1,0 +1,13 @@
+# yaml-language-server: disable
+---
+exclude_paths:
+  - .yamllint
+  - .github/
+  - .git/
+
+skip_list:
+  - yaml[document-start]
+
+warn_list:
+  - yaml[line-length]  # Ansible-lint's way of handling line length is too strict, especially for jinja multiline strings where we can't break lines easily. Therefore we let yamllint handle it and give a warning here instead of screaming error.
+...

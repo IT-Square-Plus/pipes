@@ -1,0 +1,13 @@
+---
+steps:
+  - script: |
+      bash $(Build.SourcesDirectory)/14494_CMMN_EMEA-GI-Team-Common-Library/pipeline-modules/scripts/security-scanner.sh
+    displayName: "🔑 Gitleaks Scanner"
+
+  - task: PublishPipelineArtifact@1
+    displayName: "📎 Publish Gitleaks Report"
+    condition: failed()
+    inputs:
+      targetPath: "$(System.DefaultWorkingDirectory)/gitleaks-report.json"
+      artifact: "gitleaks-report"
+...

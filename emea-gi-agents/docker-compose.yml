@@ -1,0 +1,74 @@
+---
+services:
+  emea-gi-agent:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ${IMAGE_NAME}:${AGENT_VERSION}
+    environment:
+      - VSTS_ACCOUNT=${VSTS_ACCOUNT}
+      - VSTS_TOKEN=${VSTS_TOKEN}
+      - VSTS_POOL=${VSTS_POOL}
+      - VSTS_AGENT_NAME_PREFIX=${TEAM}-Agt-${AGENT_VERSION}
+      - AGENT_VERSION=${AGENT_VERSION}
+      - TOWER_DEV=${TOWER_DEV}
+      - TOWER_PRD=${TOWER_PRD}
+    restart: always
+    security_opt:
+      - label=disable
+    stop_grace_period: 120s
+    healthcheck:
+      test: ["CMD", "pgrep", "-f", "Agent.Listener"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+        reservations:
+          memory: 1G
+    logging:
+      driver: json-file
+      options:
+        max-size: "50m"
+        max-file: "3"
+    entrypoint: ["/bin/bash"]
+    command:
+      - -c
+      - |
+        cleanup() {
+          echo "Received shutdown signal, stopping agent..."
+          kill %1 2>/dev/null
+          wait 2>/dev/null
+
+          echo "Unregistering agent from Azure DevOps..."
+          cd /azp
+          if [ -f .credentials ]; then
+            ./config.sh remove --unattended --auth pat --token $$VSTS_TOKEN
+            echo "Agent successfully unregistered"
+          else
+            echo "Agent not configured, skipping unregistration"
+          fi
+          exit 0
+        }
+
+        trap cleanup SIGTERM SIGINT
+
+        cd /azp
+        export VSTS_AGENT_NAME="$$VSTS_AGENT_NAME_PREFIX-$$(hostname)"
+        echo "Agent name: $$VSTS_AGENT_NAME"
+
+        ./config.sh --unattended \
+          --url https://dev.azure.com/$$VSTS_ACCOUNT \
+          --auth pat \
+          --token $$VSTS_TOKEN \
+          --pool $$VSTS_POOL \
+          --agent $$VSTS_AGENT_NAME \
+          --replace \
+          --acceptTeeEula
+
+        echo "Starting agent..."
+        ./run.sh &
+        wait

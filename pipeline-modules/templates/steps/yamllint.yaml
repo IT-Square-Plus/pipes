@@ -1,0 +1,6 @@
+---
+steps:
+  - script: |
+      yamllint -c $(Build.SourcesDirectory)/14494_CMMN_EMEA-GI-Team-Common-Library/pipeline-modules/dotfiles/.yamllint .
+    displayName: "📄 YAML Linter"
+...

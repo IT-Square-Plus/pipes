@@ -1,0 +1,32 @@
+[extend]
+useDefault = true
+
+# Global allowlist to exclude config files and documentation
+[[allowlists]]
+description = "Exclude gitleaks config and documentation"
+paths = [
+    '''\.gitleaks\.custom\.toml$''',
+    '''gitleaks-report\.json$''',
+    '''README\.md$''',
+    '''project\.md$'''
+]
+
+# Custom rule for hardcoded passwords
+[[rules]]
+id = "glcr-hardcoded-password"
+description = "Hardcoded password assignment"
+regex = '''(?im)^\s*\w*password\w*\s*:\s*.+'''
+
+    [[rules.allowlists]]
+    description = "Ignore gitleaks config files"
+    paths = [
+        '''\.gitleaks\.custom\.toml$''',
+        '''.*\.toml$'''
+    ]
+
+    [[rules.allowlists]]
+    description = "Ignore Jinja2 template variable references"
+    regexTarget = "match"
+    regexes = [
+        '''\{\{.*\}\}'''
+    ]

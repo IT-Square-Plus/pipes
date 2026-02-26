@@ -1,0 +1,16 @@
+---
+parameters:
+  - name: pool
+    type: string
+    default: "Auto-Scaling-Agents-Linux"
+
+jobs:
+  - job: YAMLLint
+    displayName: "📄 YAML Linter"
+    pool:
+      name: ${{ parameters.pool }}
+    steps:
+      - checkout: self
+      - checkout: EMEA-GI-AzDO-pipeline-modules
+      - template: ../steps/yamllint.yaml
+...

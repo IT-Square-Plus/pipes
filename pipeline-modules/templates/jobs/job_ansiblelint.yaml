@@ -1,0 +1,16 @@
+---
+parameters:
+  - name: pool
+    type: string
+    default: "Auto-Scaling-Agents-Linux"
+
+jobs:
+  - job: AnsibleLint
+    displayName: "⚙️ Ansible Linter"
+    pool:
+      name: ${{ parameters.pool }}
+    steps:
+      - checkout: self
+      - checkout: EMEA-GI-AzDO-pipeline-modules
+      - template: ../steps/ansiblelint.yaml
+...

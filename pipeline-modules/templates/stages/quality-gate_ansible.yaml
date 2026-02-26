@@ -1,0 +1,59 @@
+---
+parameters:
+  - name: pool
+    type: string
+    default: "EMEA-GI-Automation"
+
+stages:
+  - stage: QualityGate
+    displayName: "Quality & Security Gate"
+    jobs:
+      - job: YAMLLint
+        displayName: "YAML Linter"
+        pool:
+          name: ${{ parameters.pool }}
+        steps:
+          - checkout: self
+          - checkout: EMEA-GI-AzDO-pipeline-modules
+          - template: ../steps/yamllint.yaml
+
+      - job: AnsibleLint
+        displayName: "Ansible Linter"
+        pool:
+          name: ${{ parameters.pool }}
+        steps:
+          - checkout: self
+          - checkout: EMEA-GI-AzDO-pipeline-modules
+          - template: ../steps/ansiblelint.yaml
+
+      - job: Gitleaks
+        displayName: "Gitleaks Scanner"
+        pool:
+          name: ${{ parameters.pool }}
+        steps:
+          - checkout: self
+          - checkout: EMEA-GI-AzDO-pipeline-modules
+          - template: ../steps/gitleaks.yaml
+
+      - job: BuildTags
+        displayName: "Build Tags"
+        dependsOn:
+          - YAMLLint
+          - AnsibleLint
+          - Gitleaks
+        condition: always()
+        pool:
+          name: ${{ parameters.pool }}
+        variables:
+          allSucceeded: $[ and(eq(dependencies.YAMLLint.result, 'Succeeded'), eq(dependencies.AnsibleLint.result, 'Succeeded'), eq(dependencies.Gitleaks.result, 'Succeeded')) ]
+        steps:
+          - checkout: none
+          - bash: echo "##vso[build.addbuildtag]status__success"
+            displayName: "🏷️ Tag status__success"
+            condition: eq(variables.allSucceeded, true)
+          - bash: echo "##vso[build.addbuildtag]status__fail"
+            displayName: "🏷️ Tag status__fail"
+            condition: ne(variables.allSucceeded, true)
+          - bash: echo "##vso[build.addbuildtag]main__$(Build.SourceBranchName)"
+            displayName: "🏷️ Tag branch"
+...

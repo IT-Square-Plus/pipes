@@ -1,0 +1,64 @@
+parameters:
+  - name: sourceBranch
+    type: string
+  - name: targetBranch
+    type: string
+  - name: sourceEnv
+    type: string
+  - name: targetEnv
+    type: string
+  - name: pool
+    type: string
+    default: "EMEA-GI-Automation"
+
+stages:
+  - stage: PreCheck
+    displayName: 'Pre-check ${{ parameters.sourceEnv }} → ${{ parameters.targetEnv }}'
+    jobs:
+      - job: GatherInfo
+        displayName: 'Gather promotion details'
+        pool:
+          name: ${{ parameters.pool }}
+        steps:
+          - checkout: self
+            persistCredentials: true
+            fetchDepth: 0
+          - checkout: EMEA-GI-AzDO-pipeline-modules
+          - script: |
+              PIPELINE_DIR="$(Build.SourcesDirectory)/14494_CMMN_EMEA-GI-Team-Common-Library/pipeline-modules/scripts/pipeline"
+              REPO_DIR="$(Build.SourcesDirectory)/$(Build.Repository.Name)"
+              PYTHONPATH="${PIPELINE_DIR}" python3 -m promote precheck \
+                --source-branch ${{ parameters.sourceBranch }} \
+                --target-branch ${{ parameters.targetBranch }} \
+                --source-env ${{ parameters.sourceEnv }} \
+                --target-env ${{ parameters.targetEnv }} \
+                --repo-dir "${REPO_DIR}"
+            displayName: '🔍 Gather promotion details'
+
+  - stage: Promote
+    displayName: 'Promote ${{ parameters.sourceEnv }} → ${{ parameters.targetEnv }}'
+    dependsOn: PreCheck
+    jobs:
+      - deployment: PromoteCode
+        displayName: 'Squash, merge and tag: ${{ parameters.sourceBranch }} → ${{ parameters.targetBranch }}'
+        pool:
+          name: ${{ parameters.pool }}
+        environment: ${{ parameters.targetEnv }}
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - checkout: self
+                  persistCredentials: true
+                  fetchDepth: 0
+                - checkout: EMEA-GI-AzDO-pipeline-modules
+                - script: |
+                    PIPELINE_DIR="$(Build.SourcesDirectory)/14494_CMMN_EMEA-GI-Team-Common-Library/pipeline-modules/scripts/pipeline"
+                    REPO_DIR="$(Build.SourcesDirectory)/$(Build.Repository.Name)"
+                    PYTHONPATH="${PIPELINE_DIR}" python3 -m promote execute \
+                      --source-branch ${{ parameters.sourceBranch }} \
+                      --target-branch ${{ parameters.targetBranch }} \
+                      --source-env ${{ parameters.sourceEnv }} \
+                      --target-env ${{ parameters.targetEnv }} \
+                      --repo-dir "${REPO_DIR}"
+                  displayName: '🔀 Squash, merge and tag'

@@ -1,0 +1,33 @@
+---
+extends: default
+
+ignore: |
+  .ansible/
+  .venv/
+  venv/
+  env/
+  __pycache__/
+  .git/
+
+rules:
+  document-start:
+    present: true  # We do require YAML document-start
+  document-end:
+    present: true  # Document end is also required for better compatibility with some tools.
+  line-length:
+    max: 120
+    level: warning  # Sometimes we have long lines, but we want to be aware of them.
+  truthy:
+    level: error  # We stronly enforce using true/false instead of yes/no/on/off.
+  trailing-spaces: "enable"
+
+  # Required by ansible-lint compatibility
+  comments:
+    min-spaces-from-content: 2
+  comments-indentation: false
+  braces:
+    max-spaces-inside: 1  # Allowed: { some_key: some_value }, not allowed: {  some_key: some_value  }
+  octal-values:
+    forbid-implicit-octal: true
+    forbid-explicit-octal: true
+...
