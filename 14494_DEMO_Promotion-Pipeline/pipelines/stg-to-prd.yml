@@ -1,0 +1,19 @@
+name: '[$(Date:yyyyMMdd)$(Rev:.r)] stg → prd'
+
+trigger: none
+pr: none
+
+resources:
+  repositories:
+    - repository: EMEA-GI-AzDO-pipeline-modules
+      type: git
+      name: 14494_CMMN_EMEA-GI-Team-Common-Library
+      ref: master
+
+extends:
+  template: pipeline-modules/templates/stages/promotion.yaml@EMEA-GI-AzDO-pipeline-modules
+  parameters:
+    sourceBranch: stg-01
+    targetBranch: prd-01
+    sourceEnv: stg
+    targetEnv: prd

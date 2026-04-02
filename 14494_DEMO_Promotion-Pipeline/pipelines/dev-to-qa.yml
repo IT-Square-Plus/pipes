@@ -1,0 +1,19 @@
+name: '[$(Date:yyyyMMdd)$(Rev:.r)] dev → qa'
+
+trigger: none
+pr: none
+
+resources:
+  repositories:
+    - repository: EMEA-GI-AzDO-pipeline-modules
+      type: git
+      name: 14494_CMMN_EMEA-GI-Team-Common-Library
+      ref: master
+
+extends:
+  template: pipeline-modules/templates/stages/promotion.yaml@EMEA-GI-AzDO-pipeline-modules
+  parameters:
+    sourceBranch: dev-01
+    targetBranch: qa-01
+    sourceEnv: dev
+    targetEnv: qa

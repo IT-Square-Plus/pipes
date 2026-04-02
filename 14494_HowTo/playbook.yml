@@ -1,0 +1,28 @@
+---
+- name: Example playbook
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    # This should trigger gitleaks custom rule glcr-hardcoded-password
+    db_password: "SuperSecretPassword123!"
+
+  tasks:
+    - name: Print hello message
+      ansible.builtin.debug:
+        msg: "Hello from EMEA-GI-Team!"
+
+    - name: Show current date
+      ansible.builtin.command: date
+      register: date_output
+      changed_when: false
+
+    - name: Display date
+      ansible.builtin.debug:
+        var: date_output.stdout
+
+    - name: Print database password (for testing gitleaks)
+      ansible.builtin.debug:
+        msg: "The database password: {{ db_password }}"
+        password: "{{ dupa }}"
+...

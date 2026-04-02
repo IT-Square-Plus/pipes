@@ -1,0 +1,18 @@
+---
+name: '[$(Date:yyyyMMdd)$(Rev:.r)] $(Build.SourceBranchName) Main'
+
+resources:
+  repositories:
+    - repository: EMEA-GI-AzDO-pipeline-modules
+      type: git
+      name: 14494_CMMN_EMEA-GI-Team-Common-Library
+      ref: master
+
+trigger:
+  - dev-*
+pr:
+  - dev-*
+
+stages:
+  - template: pipeline-modules/templates/stages/quality-gate_ansible.yaml@EMEA-GI-AzDO-pipeline-modules
+...

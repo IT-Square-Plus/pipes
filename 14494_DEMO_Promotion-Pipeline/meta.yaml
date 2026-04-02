@@ -1,0 +1,7 @@
+codename: 14494_DEMO_Promotion-Pipeline
+project: MLTest
+team: EMEA-GI
+environment: dev
+instance: "01"
+version: "1.0.11"
+author: azure-pipeline@metlife.com
